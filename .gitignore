@@ -1,0 +1,7 @@
+input.txt
+target
+.idea
+.vscode
+Cargo.lock
+vcs.xml
+modules.xml
