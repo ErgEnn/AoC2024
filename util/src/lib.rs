@@ -22,4 +22,14 @@ pub fn read_lines(filename: &str) -> Vec<String> {
     buf.lines().map(|l| l.expect("Could not parse line")).collect()
 }
 
+pub fn all_pairs<T>(vec: &Vec<T>) -> Vec<(&T, &T)> {
+    let mut pairs = Vec::new();
+    for i in 0..vec.len() {
+        for j in i+1..vec.len() {
+            pairs.push((&vec[i], &vec[j]));
+        }
+    }
+    pairs
+}
+
 
