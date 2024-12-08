@@ -1,7 +1,6 @@
 [package]
-name = "aoc2024_06"
+name = "aoc2024_07"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-util = { path = "../util" }

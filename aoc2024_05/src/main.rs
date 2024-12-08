@@ -47,9 +47,7 @@ fn first_problem(lines: &Vec<&str>){
     let mut valid_updates = Vec::<Vec<&str>>::new();
     for line in lines {
         if line.contains('|') {
-            let ruleParts: Vec<&str> = line.split('|').collect();
-            let before = ruleParts[0];
-            let after = ruleParts[1];
+            let (before, after): (&str, &str) = line.split_once('|').unwrap();
             rules.entry(before).or_insert(Vec::new()).push(after);
         }
         if line.contains(',') {

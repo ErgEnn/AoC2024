@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use std::slice::Iter;
 
 #[derive(Debug)]
@@ -7,7 +8,7 @@ pub struct Grid{
     pub data: Vec<Tile>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Eq, Hash)]
 pub struct Coordinate {
     pub x: i64,
     pub y: i64,
@@ -31,6 +32,12 @@ pub struct GridIterator<'a> {
     grid: &'a Grid
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash)]
+pub struct LocAndDir {
+    pub coord: Coordinate,
+    pub dir: Direction,
+}
+
 impl<'a> Iterator for GridIterator<'a> {
     type Item = Projection<'a>;
 
@@ -45,7 +52,7 @@ impl<'a> Iterator for GridIterator<'a> {
 }
 
 impl Grid{
-    pub fn from(lines: Vec<String>, positive_dir: Direction) -> Self {
+    pub fn from(lines: &Vec<String>, positive_dir: Direction) -> Self {
         let height = lines.len();
         let width = lines[0].len();
         let mut data = Vec::with_capacity(width * height);
@@ -60,7 +67,7 @@ impl Grid{
     }
 
     pub fn get(&self, x: i64, y: i64) -> Projection {
-        if (x < 0 || x >= self.width as i64 || y < 0 || y >= self.height as i64) {
+        if x < 0 || x >= self.width as i64 || y < 0 || y >= self.height as i64 {
             return Projection{tile: None, grid: &self};
         }
         let idx = (self.width as i64 * y + x) as usize;
@@ -76,16 +83,17 @@ impl Grid{
         }
     }
 
-    pub fn print(&self) {
+    pub fn print<F>(&self, f: F) where F: Fn(&Tile)->char {
         for y in 0..self.height {
             for x in 0..self.width {
-                print!("{}", self.data[y * self.width + x].value);
+                print!("{}", f(&self.data[y * self.width + x]));
             }
+            println!()
         }
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Direction {
     N,
     NE,
@@ -123,8 +131,20 @@ impl Direction {
             Direction::NW => {Direction::SE}
         }
     }
-}
 
+    pub fn rotate_cw_90(&self) -> Direction {
+        match self {
+            Direction::N => {Direction::E}
+            Direction::NE => {Direction::SE}
+            Direction::E => {Direction::S}
+            Direction::SE => {Direction::SW}
+            Direction::S => {Direction::W}
+            Direction::SW => {Direction::NW}
+            Direction::W => {Direction::N}
+            Direction::NW => {Direction::NE}
+        }
+    }
+}
 impl Coordinate {
     pub fn step(&self, dir: &Direction) -> Coordinate {
         match self.system {
@@ -143,12 +163,39 @@ impl Coordinate {
             _ => {panic!()}
         }
     }
+
+    pub fn new(x: i64, y: i64) -> Self{
+        Coordinate{x,y,system:Direction::SE}
+    }
+}
+
+impl PartialEq<Self> for Coordinate {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
+    }
+}
+
+impl Debug for Coordinate {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({},{})", self.x, self.y)
+    }
 }
 
 impl Projection<'_> {
-    pub fn step(&self, dir: &Direction) -> Projection {
-        let new_coord = self.tile.unwrap().coord.step(&dir);
+    pub fn step(&self, dir: &Direction) -> Self {
+        let new_coord = &self.tile.unwrap().coord.step(&dir);
         self.grid.get(new_coord.x, new_coord.y)
     }
 }
 
+impl PartialEq<Self> for LocAndDir {
+    fn eq(&self, other: &Self) -> bool {
+        self.coord == other.coord && self.dir == other.dir
+    }
+}
+
+impl LocAndDir {
+    pub fn new(x: i64, y: i64, dir: Direction) -> Self {
+        LocAndDir{coord: Coordinate::new(x,y),dir}
+    }
+}
