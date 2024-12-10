@@ -106,7 +106,7 @@ pub enum Direction {
 }
 
 impl Direction {
-    pub fn iterator() -> Iter<'static, Direction> {
+    pub fn iterator_8() -> Iter<'static, Direction> {
         static DIRECTIONS: [Direction; 8] = [
             Direction::N,
             Direction::NE,
@@ -116,6 +116,15 @@ impl Direction {
             Direction::SW,
             Direction::W,
             Direction::NW];
+        DIRECTIONS.iter()
+    }
+
+    pub fn iterator_4() -> Iter<'static, Direction> {
+        static DIRECTIONS: [Direction; 4] = [
+            Direction::N,
+            Direction::E,
+            Direction::S,
+            Direction::W];
         DIRECTIONS.iter()
     }
 
